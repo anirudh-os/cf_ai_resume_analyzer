@@ -30,7 +30,7 @@ export default {
           const body = await request.json();
           const { email, password } = body;
           if (!email || !password) return new Response("Email and password are required.", { status: 400 });
-          
+
           const salt = crypto.getRandomValues(new Uint8Array(16));
           const passwordBuffer = new TextEncoder().encode(password);
           const hashBuffer = await scrypt(passwordBuffer, salt, 16384, 8, 1, 64);
@@ -46,10 +46,10 @@ export default {
           const body = await request.json();
           const { email, password } = body;
           if (!email || !password) return new Response("Email and password are required.", { status: 400 });
-          
+
           const result = await env.USER_DATA.prepare("SELECT id, password_hash FROM users WHERE email = ?").bind(email).first();
           if (!result) return new Response("Invalid email or password.", { status: 401 });
-          
+
           const [saltHex, storedHashHex] = result.password_hash.split(":");
           const salt = Uint8Array.from(saltHex.match(/.{1,2}/g).map((byte) => parseInt(byte, 16)));
           const passwordBuffer = new TextEncoder().encode(password);
@@ -72,19 +72,58 @@ export default {
           const body = await request.json();
           const { resume: resumeText, job_description: jobDesc } = body;
           if (!resumeText) return new Response('Missing "resume" field in request body.', { status: 400 });
+
+          const moderationPrompt = `
+            You are a content moderator for a resume analysis AI.
+            Your task is to determine if the provided text is a resume. A resume typically includes sections like "Experience", "Education", "Skills", contact information, or a summary. It does not have to contain all of these. Be flexible.
+            Also, check if the user request (in the job description field) is appropriate. A request is appropriate if it asks for resume feedback OR if it is empty. It is inappropriate only if it asks for unrelated things (e.g., writing a story).
+
+            Text to check: """${resumeText}"""
+            User request: """${jobDesc || ""}"""
+
+            Respond ONLY with a valid JSON object in the format:
+            {"is_resume": boolean, "is_appropriate_request": boolean, "reason": "string"}
+            - "is_resume" is true if the text is likely a resume or CV.
+            - "is_appropriate_request" is true if the request is for resume feedback OR is empty.
+            - "reason" is a brief, user-friendly explanation ONLY if a check fails.
+          `;
           
+          const moderationResponse = await env.AI.run(
+            "@cf/meta/llama-3.3-70b-instruct-fp8-fast",
+            {
+              messages: [{ role: "user", content: moderationPrompt }],
+              response_format: { type: "json_object" },
+            }
+          );
+          
+          let moderationResult;
+          try {
+              const responseData = moderationResponse.response || moderationResponse;
+              moderationResult = typeof responseData === 'string' ? JSON.parse(responseData) : responseData;
+          } catch (e) {
+              console.error("Moderation JSON parsing failed:", e);
+              return new Response("Moderation check failed. Please try again.", { status: 500 });
+          }
+          
+          if (!moderationResult.is_resume) {
+            return new Response(moderationResult.reason || "The uploaded document does not appear to be a resume.", { status: 400 });
+          }
+          if (!moderationResult.is_appropriate_request) {
+            return new Response(moderationResult.reason || "The request is not appropriate for this tool.", { status: 400 });
+          }
+
+          // RAG PIPELINE 
           const resumeEmbeddingResponse = await env.AI.run("@cf/baai/bge-base-en-v1.5", { text: [resumeText] });
           const resumeVector = resumeEmbeddingResponse.data[0];
           const similarTips = await env.RESUME_TIPS_INDEX.query(resumeVector, { topK: 3, returnMetadata: true });
           const context = similarTips.matches.map((match) => match.metadata.text).join("\n- ");
           
-          let prompt = `You are an expert resume reviewer. Use the following best-practice tips to provide actionable feedback.\n\nContextual Tips:\n- ${context}\n\n---\nResume:\n${resumeText}`;
+          let prompt = `You are an expert resume reviewer. Use the following best-practice tips to provide actionable feedback. Format your response in Markdown.\n\nContextual Tips:\n- ${context}\n\n---\nResume:\n${resumeText}`;
           if (jobDesc) {
               prompt += `\n\n---\nJob Description:\n${jobDesc}\n\nProvide the predicted ATS score, insights on how well the resume aligns with this role, and what can be improved.`;
           }
           
-          // --- FIX: Increased token limit for a complete response ---
-          const aiResponse = await env.AI.run("@cf/mistral/mistral-7b-instruct-v0.1", { 
+          const aiResponse = await env.AI.run("@cf/meta/llama-3.3-70b-instruct-fp8-fast", { 
               messages: [{ role: "user", content: prompt }],
               max_tokens: 1500 
           });
