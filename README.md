@@ -56,7 +56,7 @@ To run this project locally, ensure you have **Node.js** and the **Wrangler CLI*
 ### 1. Clone the Repository
 ```bash
 git clone https://github.com/anirudh-os/cf_ai_resume_analyzer.git
-cd resume-read
+cd cf_ai_resume_analyzer
 ```
 ### 2. Install Dependencies
 ```bash
