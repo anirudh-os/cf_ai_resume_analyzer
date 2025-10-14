@@ -66,16 +66,25 @@ npm install
 The application requires a secret key for signing JWTs. This is handled using a .dev.vars file for local development.
 
 1. Generate a secret key by running the following command in your terminal:
+   ```bash
+   openssl rand -base64 32
+   ```
 2. Create a file named `.dev.vars` in the root of the project.
 3. Add the generated key to the file:
    ```bash
-   openssl rand -base64 32
+   JWT_SECRET="your_generated_secret_key_here"
    ```
 4. Run the Development Server
    ```bash
    npx wrangler dev
    ```
 Your application will be available at http://localhost:8787. The server provides your frontend, runs your backend Worker, and gives you access to your remote D1 and Vectorize bindings.
+
+## Deployment
+The application is deployed on Cloudflare Pages. To deploy your own version, simply run:
+```bash
+npx wrangler deploy
+```
 
 ---
 
