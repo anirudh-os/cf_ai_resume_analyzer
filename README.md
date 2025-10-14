@@ -1,37 +1,37 @@
-# 🧠 AI Resume Analyzer
+# AI Resume Analyzer
 
 **AI Resume Analyzer** is a full-stack, serverless application designed to provide intelligent, context-aware feedback on user resumes.  
 Built on the **Cloudflare stack**, it leverages a **Retrieval-Augmented Generation (RAG)** pipeline to offer high-quality analysis grounded in a curated knowledge base of resume best practices.
 
 ---
 
-## 🚀 Features
+## Features
 
-### 🔐 Secure User Authentication
+### Secure User Authentication
 - Users can sign up and log in securely.  
 - Passwords are end-to-end encrypted using **scrypt-js**.  
 - Sessions are managed with **JSON Web Tokens (JWTs)**.
 
-### 🧩 Intelligent RAG Pipeline
+### Intelligent RAG Pipeline
 - The analysis goes beyond a simple LLM prompt.  
 - Retrieves the most relevant resume tips from a **Vectorize** knowledge base.  
 - Constructs a **context-aware AI prompt** for nuanced feedback.
 
-### 🧹 Input Moderation
+### Input Moderation
 - Preliminary AI checks ensure uploaded documents are valid resumes.  
 - Prevents misuse or irrelevant inputs before analysis.
 
-### 📄 Client-Side PDF Parsing
+### Client-Side PDF Parsing
 - Uses **pdf.js** to parse resumes directly in the browser.  
 - Only the extracted text is sent to the backend, improving performance and privacy.
 
-### 💬 Dynamic UI
+### Dynamic UI
 - Clean, responsive single-page application.  
 - Features file uploads, chat-style interactions, and light/dark mode toggling.
 
 ---
 
-## 🧱 Tech Stack
+## Tech Stack
 
 | Layer | Technology |
 |-------|-------------|
@@ -41,7 +41,7 @@ Built on the **Cloudflare stack**, it leverages a **Retrieval-Augmented Generati
 | **AI/LLM** | Cloudflare Workers AI (Mistral 7B) |
 | **Frontend** | Vanilla JavaScript, HTML5, CSS3 |
 
-### 🧰 Libraries Used
+### Libraries Used
 - [`pdf.js`](https://mozilla.github.io/pdf.js/) – Client-side PDF parsing  
 - [`marked.js`](https://marked.js.org/) – Render Markdown responses  
 - [`scrypt-js`](https://www.npmjs.com/package/scrypt-js) – Password hashing  
@@ -49,7 +49,7 @@ Built on the **Cloudflare stack**, it leverages a **Retrieval-Augmented Generati
 
 ---
 
-## 🧑‍💻 Local Development Setup
+## Local Development Setup
 
 To run this project locally, ensure you have **Node.js** and the **Wrangler CLI** installed.
 
