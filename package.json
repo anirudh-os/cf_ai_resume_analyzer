@@ -1,5 +1,5 @@
 {
-	"name": "resume-read",
+	"name": "ai-resume-analyzer",
 	"version": "0.0.0",
 	"private": true,
 	"scripts": {
@@ -12,5 +12,10 @@
 		"@cloudflare/vitest-pool-workers": "^0.8.19",
 		"vitest": "~3.2.0",
 		"wrangler": "^4.42.2"
+	},
+	"dependencies": {
+		"@tsndr/cloudflare-worker-jwt": "^3.2.0",
+		"pdfjs-dist": "^5.4.296",
+		"scrypt-js": "^3.0.1"
 	}
 }

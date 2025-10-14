@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resume Analyzer</title>
+    <link rel="stylesheet" href="style.css?v=3">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.5.136/pdf.mjs" type="module"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <aside class="sidebar">
+            <div class="sidebar-top">
+                <h2 class="sidebar-title">Resume Read</h2>
+                <button id="new-chat-btn" class="sidebar-button">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 5V19M5 12H19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    New Chat
+                </button>
+            </div>
+            <div class="sidebar-bottom">
+                <div class="dark-mode-toggle">
+                    <label class="switch">
+                        <input type="checkbox" id="theme-toggle">
+                        <span class="slider"></span>
+                    </label>
+                    <span id="theme-label" class="toggle-label">Dark Mode</span>
+                </div>
+                <div id="profile-btn" class="profile">
+                    <img src="https://i.pravatar.cc/40" alt="User Avatar">
+                </div>
+            </div>
+        </aside>
+        <main class="main-content">
+            <div id="chat-container">
+                <div class="welcome-message">
+                    <h1>Resume Read</h1>
+                    <p>Your resume proofreader</p>
+                </div>
+            </div>
+            <div class="input-area-container">
+                <div id="file-preview-container"></div> 
+                <div class="input-area">
+                    <button id="upload-btn" class="upload-button">+</button>
+                    <input type="file" id="file-input" accept=".pdf" hidden>
+                    <input type="text" id="job-description-input" placeholder="enter your job description (optional)">
+                    <button id="send-btn" class="send-button">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7 11L12 6L17 11M12 18V7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                    </button>
+                </div>
+                 <div id="file-name-display"></div>
+            </div>
+        </main>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>
