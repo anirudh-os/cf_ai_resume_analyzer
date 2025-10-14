@@ -38,7 +38,7 @@ Built on the **Cloudflare stack**, it leverages a **Retrieval-Augmented Generati
 | **Backend** | Cloudflare Workers |
 | **Database** | Cloudflare D1 |
 | **Vector Database** | Cloudflare Vectorize |
-| **AI/LLM** | Cloudflare Workers AI (Mistral 7B) |
+| **AI/LLM** | Cloudflare Workers AI (Llama 3.3 70B Instruct) |
 | **Frontend** | Vanilla JavaScript, HTML5, CSS3 |
 
 ### Libraries Used
