@@ -7,26 +7,31 @@
 ## Features
 
 ### Secure User Authentication
-- Users can sign up and log in securely.  
-- Passwords are end-to-end encrypted using **scrypt-js**.  
+- Users can sign up and log in securely.
+- Passwords are hashed using **scrypt-js**.
 - Sessions are managed with **JSON Web Tokens (JWTs)**.
 
 ### Intelligent RAG Pipeline
-- The analysis goes beyond a simple LLM prompt.  
-- Retrieves the most relevant resume tips from a **Vectorize** knowledge base.  
+- Analysis uses **Retrieval-Augmented Generation**.
+- Retrieves relevant resume tips from a **Vectorize** knowledge base.
 - Constructs a **context-aware AI prompt** for nuanced feedback.
 
 ### Input Moderation
-- Preliminary AI checks ensure uploaded documents are valid resumes.  
+- Preliminary AI check ensures uploaded documents are valid resumes.
+- Verifies user requests are appropriate for the tool.
 - Prevents misuse or irrelevant inputs before analysis.
 
 ### Client-Side PDF Parsing
-- Uses **pdf.js** to parse resumes directly in the browser.  
-- Only the extracted text is sent to the backend, improving performance and privacy.
+- Uses **pdf.js** to parse resumes directly in the browser.
+- Only extracted text is sent to the backend, improving performance and privacy.
+
+### Analysis History
+- Saves past analysis results (resume, job description, feedback) linked to the user in **Cloudflare D1**.
+- Allows users to view and reload previous analyses via the sidebar.
 
 ### Dynamic UI
-- Clean, responsive single-page application.  
-- Features file uploads, chat-style interactions, and light/dark mode toggling.
+- Clean, responsive single-page application.
+- Features file uploads, chat-style interactions, history navigation, and light/dark mode toggling.
 
 ---
 
