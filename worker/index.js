@@ -13,9 +13,13 @@ async function authenticateUser(request, env) {
       return { error: "Invalid token.", status: 401 };
     }
     const payload = jwt.decode(token).payload;
+    if (!payload || typeof payload.sub === 'undefined') {
+       throw new Error("Invalid token payload");
+    }
     return { user: payload };
   } catch (err) {
-    return { error: "Invalid token.", status: 401 };
+      console.error("Authentication error:", err); 
+      return { error: `Invalid token: ${err.message}`, status: 401 };
   }
 }
 
@@ -86,10 +90,12 @@ export default {
             - "is_resume" is true if the text is likely a resume or CV.
             - "is_appropriate_request" is true if the request is for resume feedback OR is empty.
             - "reason" is a brief, user-friendly explanation ONLY if a check fails.
+
+            DO NOT add anything extra to the response, other than the JSON object!
           `;
           
           const moderationResponse = await env.AI.run(
-            "@cf/meta/llama-3.3-70b-instruct-fp8-fast",
+            "@cf/meta/llama-3.1-8b-instruct-fast", 
             {
               messages: [{ role: "user", content: moderationPrompt }],
               response_format: { type: "json_object" },
@@ -112,7 +118,6 @@ export default {
             return new Response(moderationResult.reason || "The request is not appropriate for this tool.", { status: 400 });
           }
 
-          // RAG PIPELINE 
           const resumeEmbeddingResponse = await env.AI.run("@cf/baai/bge-base-en-v1.5", { text: [resumeText] });
           const resumeVector = resumeEmbeddingResponse.data[0];
           const similarTips = await env.RESUME_TIPS_INDEX.query(resumeVector, { topK: 3, returnMetadata: true });
@@ -123,17 +128,43 @@ export default {
               prompt += `\n\n---\nJob Description:\n${jobDesc}\n\nProvide the predicted ATS score, insights on how well the resume aligns with this role, and what can be improved.`;
           }
           
-          const aiResponse = await env.AI.run("@cf/meta/llama-3.3-70b-instruct-fp8-fast", { 
+          const aiResponse = await env.AI.run("@cf/meta/llama-3.3-70b-instruct-fp8-fast", {
               messages: [{ role: "user", content: prompt }],
-              max_tokens: 1500 
+              max_tokens: 1500
           });
 
-          return new Response(JSON.stringify({ feedback: aiResponse.response, context_tips: context.split("\n- ") }), { headers: { "Content-Type": "application/json" } });
+          const userId = authResult.user.sub;
+          const feedbackText = aiResponse.response;
+          try {
+              await env.USER_DATA.prepare(
+                  "INSERT INTO analysis_history (user_id, resume_text, job_description, ai_feedback) VALUES (?, ?, ?, ?)"
+              ).bind(userId, resumeText, jobDesc || null, feedbackText).run();
+          } catch (dbError) {
+              console.error("Failed to save analysis history:", dbError);
+          }
+
+          return new Response(JSON.stringify({ feedback: feedbackText, context_tips: context.split("\n- ") }), { headers: { "Content-Type": "application/json" } });
+        }
+
+        if (pathname === "/api/history" && request.method === "GET") {
+          const authResult = await authenticateUser(request, env);
+          if (authResult.error) return new Response(authResult.error, { status: authResult.status });
+
+          const userId = authResult.user.sub;
+
+          const { results } = await env.USER_DATA.prepare(
+            "SELECT id, timestamp, resume_text, job_description, ai_feedback FROM analysis_history WHERE user_id = ? ORDER BY timestamp DESC LIMIT 20" // Added LIMIT
+          ).bind(userId).all();
+
+          return new Response(JSON.stringify(results || []), { 
+            headers: { "Content-Type": "application/json" }
+          });
         }
         
         return new Response("API endpoint not found", { status: 404 });
 
       } catch (err) {
+          console.error("API Error:", err); 
           if (err.message.includes("UNIQUE constraint failed")) return new Response("User already exists.", { status: 400 });
           return new Response(`Error: ${err.message}`, { status: 500 });
       }
