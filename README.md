@@ -1,7 +1,6 @@
 # AI Resume Analyzer
 
-**AI Resume Analyzer** is a full-stack, serverless application designed to provide intelligent, context-aware feedback on user resumes.  
-Built on the **Cloudflare stack**, it leverages a **Retrieval-Augmented Generation (RAG)** pipeline to offer high-quality analysis grounded in a curated knowledge base of resume best practices.
+[AI Resume Analyzer](https://ai-resume-analyzer.koundinyaani05.workers.dev/) is a full-stack, serverless application designed to provide intelligent, context-aware feedback on user resumes. Built on the **Cloudflare stack**, it leverages a **Retrieval-Augmented Generation (RAG)** pipeline to offer high-quality analysis grounded in a curated knowledge base of resume best practices.
 
 ---
 
